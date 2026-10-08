@@ -127,7 +127,7 @@ def test_r7_score_persistence():
     for name, body in (("game.gd", game), ("main_menu.gd", menu)):
         assert "ConfigFile" in body, "%s 缺少 ConfigFile" % name
         assert "user://highscore.cfg" in body, "%s 缺少存档路径" % name
-    assert "cfg.save(SAVE_PATH)" in game, "缺少保存调用"
+    assert "cfg.save(SAVE_PATH + \".tmp\")" in game and "dir.rename(\"highscore.cfg.tmp\", \"highscore.cfg\")" in game, "缺少原子写保存调用"
     assert "cfg.load(SAVE_PATH)" in game, "缺少读取调用"
 
 

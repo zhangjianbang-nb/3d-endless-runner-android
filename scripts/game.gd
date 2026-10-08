@@ -12,6 +12,8 @@ const SPAWN_INTERVAL: float = 1.1
 const SPAWN_Z: float = -90.0
 const DESPAWN_Z: float = 14.0
 const SAVE_PATH: String = "user://highscore.cfg"
+const SESSION_PATH: String = "user://meta/session.json"
+const EVENTS_PATH: String = "user://logs/events.jsonl"
 
 const LANE_X := [-2.0, 0.0, 2.0]
 
@@ -197,13 +199,72 @@ func _to_menu() -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
+func _notification(what: int) -> void:
+	# Android 生命周期挂钩（reliability F-3）：切后台/返回键→暂停+立即落盘+clean_exit 位
+	match what:
+		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_WM_GO_BACK_REQUEST:
+			if state == State.RUNNING:
+				_toggle_pause()
+			_save_high_score()
+			_write_session(false)
+		NOTIFICATION_APPLICATION_RESUMED:
+			_write_session(true)
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			_save_high_score()
+			_write_session(true)
+
+func _event(name: String, detail: Dictionary = {}) -> void:
+	# 本地结构化事件日志（reliability §5）：追加一行 JSON，失败静默（不阻塞游戏循环）
+	var f := FileAccess.open(EVENTS_PATH, FileAccess.READ)
+	var prev := f.get_as_text() if f else ""
+	f = FileAccess.open(EVENTS_PATH, FileAccess.WRITE)
+	if f:
+		if prev != "":
+			f.store_string(prev if prev.ends_with("\n") else prev + "\n")
+		f.store_line(JSON.stringify({"ts": Time.get_unix_time_from_system(), "event": name, "detail": detail}))
+		f.close()
+
+func _write_session(clean: bool) -> void:
+	# clean_exit 崩溃检测位（SLO-1）：启动时读到 false 则记 crash_suspected
+	var dir := DirAccess.open("user://")
+	if dir and not dir.dir_exists("meta"):
+		dir.make_dir("meta")
+	var f := FileAccess.open(SESSION_PATH, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify({"clean_exit": clean, "ts": Time.get_unix_time_from_system()}))
+		f.close()
+
 func _load_high_score() -> void:
+	# 读档降级链（reliability F-1）：主档 → .bak → 默认值，永不崩溃
 	var cfg := ConfigFile.new()
-	if cfg.load(SAVE_PATH) == OK:
-		high_score = int(cfg.get_value("score", "high", 0))
+	var loaded := cfg.load(SAVE_PATH) == OK
+	if loaded:
+		high_score = _read_high(cfg)
+	else:
+		var bak := ConfigFile.new()
+		if bak.load(SAVE_PATH + ".bak") == OK:
+			high_score = _read_high(bak)
+			_event("save_recovered", {"from": "bak"})
+		else:
+			_event("save_reset")
+	if not loaded and FileAccess.file_exists(SAVE_PATH):
+		_event("save_corrupt")
 	high_label.text = "最高分: %d" % high_score
 
+func _read_high(cfg: ConfigFile) -> int:
+	return int(cfg.get_value("score", "high", 0))
+
 func _save_high_score() -> void:
+	# 原子写（reliability F-1）：轮转 .bak → 写 .tmp → rename 提交
+	var dir := DirAccess.open("user://")
+	if dir and FileAccess.file_exists(SAVE_PATH):
+		if dir.file_exists("highscore.cfg.bak"):
+			dir.remove("highscore.cfg.bak")
+		dir.rename("highscore.cfg", "highscore.cfg.bak")
 	var cfg := ConfigFile.new()
 	cfg.set_value("score", "high", high_score)
-	cfg.save(SAVE_PATH)
+	if cfg.save(SAVE_PATH + ".tmp") == OK and dir:
+		if dir.file_exists("highscore.cfg"):
+			dir.remove("highscore.cfg")
+		dir.rename("highscore.cfg.tmp", "highscore.cfg")
+	_event("score_saved", {"high": high_score})
