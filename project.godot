@@ -1,0 +1,26 @@
+; Engine configuration file.
+; Godot 4.x 竖屏 3D 无尽跑酷
+
+config_version=5
+
+[application]
+
+config/name="3D Endless Runner"
+run/main_scene="res://scenes/main_menu.tscn"
+config/features=PackedStringArray("4.3", "Mobile")
+
+[autoload]
+
+Sfx="*res://scripts/sfx.gd"
+
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/handheld/orientation=1
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+
+renderer/rendering_method="mobile"

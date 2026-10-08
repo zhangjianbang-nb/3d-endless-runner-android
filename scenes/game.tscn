@@ -1,0 +1,186 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="2_player"]
+
+[node name="Game" type="Node3D"]
+script = ExtResource("1_game")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+script = ExtResource("2_player")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.951, 0.309, 0, -0.309, 0.951, 0, 3.2, 7)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, 0.354, -0.354, 0, 0.707, 0.707, 0.5, -0.612, 0.612, 0, 10, 0)
+light_energy = 1.2
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Hud" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ScoreLabel" type="Label" parent="UI/Hud"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 400.0
+offset_bottom = 90.0
+theme_override_font_sizes/font_size = 44
+text = "分数: 0"
+
+[node name="HighScoreLabel" type="Label" parent="UI/Hud"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 100.0
+offset_right = 400.0
+offset_bottom = 150.0
+theme_override_font_sizes/font_size = 28
+text = "最高分: 0"
+
+[node name="PauseButton" type="Button" parent="UI/Hud"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -120.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 96.0
+theme_override_font_sizes/font_size = 30
+text = "暂停"
+
+[node name="PauseMenu" type="Control" parent="UI/Hud"]
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Dim" type="ColorRect" parent="UI/Hud/PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="PauseTitle" type="Label" parent="UI/Hud/PauseMenu"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 420.0
+offset_bottom = 520.0
+theme_override_font_sizes/font_size = 56
+text = "已暂停"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="UI/Hud/PauseMenu"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -40.0
+offset_right = 160.0
+offset_bottom = 60.0
+theme_override_font_sizes/font_size = 36
+text = "继续"
+
+[node name="ToMenuButton" type="Button" parent="UI/Hud/PauseMenu"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = 100.0
+offset_right = 160.0
+offset_bottom = 200.0
+theme_override_font_sizes/font_size = 36
+text = "返回主菜单"
+
+[node name="GameOverPanel" type="Control" parent="UI/Hud"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Dim" type="ColorRect" parent="UI/Hud/GameOverPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0, 0, 0.7)
+
+[node name="FinalScoreLabel" type="Label" parent="UI/Hud/GameOverPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 380.0
+offset_bottom = 480.0
+theme_override_font_sizes/font_size = 48
+text = "游戏结束"
+horizontal_alignment = 1
+
+[node name="RetryButton" type="Button" parent="UI/Hud/GameOverPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -60.0
+offset_right = 160.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 36
+text = "再来一局"
+
+[node name="GameOverMenuButton" type="Button" parent="UI/Hud/GameOverPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = 80.0
+offset_right = 160.0
+offset_bottom = 180.0
+theme_override_font_sizes/font_size = 36
+text = "返回主菜单"
